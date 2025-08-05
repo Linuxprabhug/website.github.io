@@ -1,51 +1,41 @@
 # website.github.io
-from flask import Flask, render_template, request, redirect
-import sqlite3
-
-app = Flask(__name__)
-
-def init_db():
-    conn = sqlite3.connect('assets.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS assets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            asset_tag TEXT,
-            hostname TEXT,
-            ip_address TEXT,
-            location TEXT,
-            floor TEXT,
-            remarks TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        asset_tag = request.form['asset_tag']
-        hostname = request.form['hostname']
-        ip_address = request.form['ip_address']
-        location = request.form['location']
-        floor = request.form['floor']
-        remarks = request.form['remarks']
-        
-        conn = sqlite3.connect('assets.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO assets (asset_tag, hostname, ip_address, location, floor, remarks) VALUES (?, ?, ?, ?, ?, ?)",
-                  (asset_tag, hostname, ip_address, location, floor, remarks))
-        conn.commit()
-        conn.close()
-        return redirect('/')
-    else:
-        conn = sqlite3.connect('assets.db')
-        c = conn.cursor()
-        c.execute("SELECT * FROM assets")
-        assets = c.fetchall()
-        conn.close()
-        return render_template('index.html', assets=assets)
-
-if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Inventory</title>
+</head>
+<body>
+    <h1>Asset Inventory</h1>
+    <form method="post">
+        Asset Tag: <input name="asset_tag"><br>
+        Hostname: <input name="hostname"><br>
+        IP Address: <input name="ip_address"><br>
+        Location: <input name="location"><br>
+        Floor: <input name="floor"><br>
+        Remarks: <input name="remarks"><br>
+        <button type="submit">Add Asset</button>
+    </form>
+    <table border="1">
+        <tr>
+            <th>Sl.no</th>
+            <th>Asset Tag</th>
+            <th>Hostname</th>
+            <th>IP Address</th>
+            <th>Location</th>
+            <th>Floor</th>
+            <th>Remarks</th>
+        </tr>
+        {% for asset in assets %}
+        <tr>
+            <td>{{ asset[0] }}</td>
+            <td>{{ asset[1] }}</td>
+            <td>{{ asset[2] }}</td>
+            <td>{{ asset[3] }}</td>
+            <td>{{ asset[4] }}</td>
+            <td>{{ asset[5] }}</td>
+            <td>{{ asset[6] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
